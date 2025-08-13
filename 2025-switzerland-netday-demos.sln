@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hyde", "hyde", "{96DBC365-E440-1793-E4BE-697B5DBAB58F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HydeDemo", "hyde\Demo\HydeDemo.csproj", "{DDE76745-7AA0-5C18-25A8-E98CF191BC5A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DDE76745-7AA0-5C18-25A8-E98CF191BC5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDE76745-7AA0-5C18-25A8-E98CF191BC5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDE76745-7AA0-5C18-25A8-E98CF191BC5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDE76745-7AA0-5C18-25A8-E98CF191BC5A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DDE76745-7AA0-5C18-25A8-E98CF191BC5A} = {96DBC365-E440-1793-E4BE-697B5DBAB58F}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {57EE4B56-6EA1-4996-B6BF-72D2554A991B}
+	EndGlobalSection
+EndGlobal

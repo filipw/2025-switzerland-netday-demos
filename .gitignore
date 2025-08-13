@@ -416,3 +416,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+.reference
+hyde/chatcompletions-agent-hyde-rag/
+hyde/Demo/data/
+hyde/Demo/.sample/
