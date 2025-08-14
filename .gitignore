@@ -418,5 +418,7 @@ FodyWeavers.xsd
 *.msp
 .reference
 hyde/chatcompletions-agent-hyde-rag/
+hype/chatcompletions-agent-hype-rag/
 hyde/Demo/data/
-hyde/Demo/.sample/
+hype/Demo/data/
+.sample/

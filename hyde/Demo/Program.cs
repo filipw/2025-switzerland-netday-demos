@@ -61,7 +61,7 @@ class Program
         hydeStore.SetServices(embeddingService, chatService);
 
         // Load and process the demo data
-        var dataPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "shared-data", "projects.md");
+        var dataPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "shared-data", "projects.md");
         Console.WriteLine($"\n📄 Loading quantum projects data from {dataPath}");
 
         if (!File.Exists(dataPath))
