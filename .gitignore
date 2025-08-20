@@ -422,3 +422,4 @@ hype/chatcompletions-agent-hype-rag/
 hyde/Demo/data/
 hype/Demo/data/
 .sample/
+.DS_Store
