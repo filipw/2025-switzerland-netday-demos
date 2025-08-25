@@ -3,31 +3,22 @@ using OpenAI.Realtime;
 using System.ClientModel;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using Azure;
-using Azure.Search.Documents;
-using Azure.Search.Documents.Indexes;
-using Azure.Search.Documents.Models;
+using Strathweb.Samples.Realtime.Rag.Services;
 
-// bootstrap RealtimeConvetrsationClient 
+// bootstrap RealtimeConversationClient 
 var endpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ??
                throw new Exception("'AZURE_OPENAI_ENDPOINT' must be set");
 var key = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY") ??
           throw new Exception("'AZURE_OPENAI_API_KEY' must be set");
 var deploymentName = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT") ?? "gpt-4o-realtime-preview";
+var embeddingDeployment = Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME") ?? "text-embedding-ada-002";
 
 var aoaiClient = new AzureOpenAIClient(new Uri(endpoint), new ApiKeyCredential(key));
 var client = aoaiClient.GetRealtimeClient();
 
-// bootstrap SearchClient
-var searchEndpoint = Environment.GetEnvironmentVariable("AZURE_SEARCH_ENDPOINT") ??
-                     throw new Exception("'AZURE_SEARCH_ENDPOINT' must be set");
-
-var searchCredential = Environment.GetEnvironmentVariable("AZURE_SEARCH_API_KEY") ??
-                       throw new Exception("'AZURE_SEARCH_API_KEY' must be set");
-var indexName = Environment.GetEnvironmentVariable("AZURE_SEARCH_INDEX");
-var indexClient = new SearchIndexClient(new Uri(searchEndpoint), new AzureKeyCredential(searchCredential));
-var searchClient = indexClient.GetSearchClient(indexName);
+// bootstrap Local Vector Store
+var dataPath = Path.Combine(Directory.GetCurrentDirectory(), "data", "metadata_structured.json");
+var vectorStore = await LocalVectorStore.LoadFromFileAsync(dataPath, aoaiClient, embeddingDeployment);
 
 // prepare audio input, this plays the role of mic input in this demo
 var inputAudioPath = Path.Combine(Directory.GetCurrentDirectory(), "user-question.pcm");
@@ -58,7 +49,7 @@ var sessionOptions = new ConversationSessionOptions()
                   "properties": {
                     "query": {
                       "type": "string",
-                      "description": "The search query e.g. 'miami themed products'"
+                      "description": "The search query in a form of a statement e.g. 'The product is Miami themed'"
                     }
                   },
                   "required": ["query"]
@@ -72,7 +63,7 @@ var sessionOptions = new ConversationSessionOptions()
 };
 await session.ConfigureConversationSessionAsync(sessionOptions);
 
-// dispatch audio and start processing responses
+        // dispatch audio and start processing responses
 await session.SendInputAudioAsync(inputAudioStream);
 await Process(session);
 
@@ -140,35 +131,26 @@ async Task<string> InvokeFunction(string functionName, string functionArguments)
 
         var query = root.GetProperty("query").GetString();
 
-        var result = await InvokeSearch(query, searchClient);
+        var result = await InvokeSearch(query, vectorStore);
         return result;
     }
 
     throw new Exception($"Unsupported tool '{functionName}'");
 }
 
-static async Task<string> InvokeSearch(string query, SearchClient searchClient)
+static async Task<string> InvokeSearch(string query, LocalVectorStore vectorStore)
 {
-    SearchResults<Product> response = await searchClient.SearchAsync<Product>(query, new SearchOptions
+    var results = await vectorStore.SearchAsync(query);
+    var resultText = new StringBuilder();
+    
+    foreach (var product in results)
     {
-        Size = 5
-    });
-    var results = new StringBuilder();
-    var resultCount = 0;
-    await foreach (var result in response.GetResultsAsync())
-    {
-        resultCount++;
-        results.AppendLine($"Product: {result.Document.Name}, Description: {result.Document.Description}");
+        resultText.AppendLine($"Product: {product.Name}, Category: {product.Category}, Price: {product.Price}, Description: {product.Description}");
     }
 
-    results.AppendLine($"Total results: {resultCount}");
+    resultText.AppendLine($"Total results: {results.Count}");
 
-    var documentation = results.ToString();
+    var documentation = resultText.ToString();
     Console.WriteLine($" -> Retrieved documentation:\n{documentation}");
     return documentation;
 }
-
-public record Product(
-    [property: JsonPropertyName("description")]
-    string Description,
-    [property: JsonPropertyName("name")] string Name);
